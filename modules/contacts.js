@@ -18,7 +18,7 @@ const showContactsList = async () => {
 };
 
 const getContactById = async id => {
-  const contacts = await showContactsList();
+  const contacts = await showContactsList() || [];
   return contacts.find(contact => contact.id === id);
 };
 
