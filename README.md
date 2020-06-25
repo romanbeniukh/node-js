@@ -1,7 +1,7 @@
 # node-js
 
 ### show list
-![list](https://ibb.co/d681fnm)
+![list](https://i.ibb.co/wC53dDc/2020-06-25-21-20-13.png)
 
 ### get by id
 ![get-by-id](https://ibb.co/cLdgycp)
