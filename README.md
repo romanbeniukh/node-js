@@ -1,13 +1,13 @@
 # node-js
 
 ### show list
-![list](https://raw.githubusercontent.com/romanbeniukh/node-js/01-node-basics/img/showList.png)
+![list](https://ibb.co/d681fnm)
 
 ### get by id
-![get-by-id](https://raw.githubusercontent.com/romanbeniukh/node-js/01-node-basics/img/getById.png)
+![get-by-id](https://ibb.co/cLdgycp)
 
 ### add
-![add](https://raw.githubusercontent.com/romanbeniukh/node-js/01-node-basics/img/add.png)
+![add](https://ibb.co/RvcdqrW)
 
 ### remove
-![remove](https://raw.githubusercontent.com/romanbeniukh/node-js/01-node-basics/img/remove.png)
+![remove](https://ibb.co/j3yxtTx)
