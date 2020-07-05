@@ -1,72 +1,41 @@
-const fs = require('fs').promises;
-const path = require('path');
-const { uuid } = require('uuidv4');
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const { ObjectId } = mongoose.Types;
 
-const contactsDb = path.join('db', 'contacts.json');
-
-class Contact {
-  constructor({ name, phone, email }, id) {
-    this.id = id;
-    this.name = name;
-    this.phone = phone;
-    this.email = email;
+const contactSchema = new Schema(
+  {
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    phone: { type: String, required: true },
   }
+);
+
+const getContacts = async function () {
+  return this.find();
+};
+
+const getContactById = async function (id) {
+  return (ObjectId.isValid(id)) ? this.findById(id) : null;
+};
+
+const deleteContact = async function (id) {
+  return (ObjectId.isValid(id)) ? this.findByIdAndDelete(id) : null;
+};
+
+const addContact = async function (contact) {
+  return this.create(contact);
 }
 
-const getContacts = async () => {
-  const contacts = await fs.readFile(contactsDb, 'utf-8');
-  return JSON.parse(contacts);
-};
+const updateContact = async function (id, updateData) {
+  return (ObjectId.isValid(id)) ? this.findByIdAndUpdate(id, updateData, { new: true }) : null;
+}
 
-const getContactById = async (id) => {
-  const contacts = await getContacts() || [];
-  return contacts.find((contact) => contact.id === id);
-};
+contactSchema.statics.getContacts = getContacts;
+contactSchema.statics.getContactById = getContactById;
+contactSchema.statics.deleteContact = deleteContact;
+contactSchema.statics.addContact = addContact;
+contactSchema.statics.updateContact = updateContact;
 
-const removeContact = async (id) => {
-  const contacts = await getContacts() || [];
-  const isContact = await getContactById(id) || null;
+const Contact = mongoose.model('Contact', contactSchema);
 
-  if (isContact) {
-    const contactsAfterRemove = contacts.filter((contact) => contact.id !== id);
-    const contactsForDb = JSON.stringify(contactsAfterRemove);
-
-    await fs.writeFile(contactsDb, contactsForDb);
-  }
-
-  return isContact;
-};
-
-const addContact = async (name, phone, email) => {
-  const contacts = await getContacts() || [];
-  const id = uuid();
-  const createdContact = new Contact({ name, phone, email }, id);
-  const newContacts = [...contacts, createdContact];
-  const contactsForDb = JSON.stringify(newContacts);
-
-  await fs.writeFile(contactsDb, contactsForDb);
-
-  return createdContact;
-};
-
-const updateContact = async (id, updatedValue) => {
-  const contacts = await getContacts() || [];
-  const contact = await getContactById(id) || null;
-
-  if (contact) {
-    const newContact = { ...contact, ...updatedValue };
-    const newContacts = contacts.map((elem) => (elem.id !== newContact.id ? elem : newContact));
-    const contactsForDb = JSON.stringify(newContacts);
-
-    await fs.writeFile(contactsDb, contactsForDb);
-    return newContact;
-  }
-};
-
-module.exports = {
-  getContacts,
-  getContactById,
-  removeContact,
-  addContact,
-  updateContact,
-};
+module.exports = Contact;
