@@ -1,9 +1,14 @@
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
+const connect = require('./db/connect')
 const { contactsRouter } = require('./routes/contacts.router');
 
+require('dotenv').config({ path: './.env' });
+
 const app = express();
+
+connect();
 
 app.use(cors());
 
