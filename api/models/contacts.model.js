@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+import mongoose, { Schema } from 'mongoose';
+
 const { ObjectId } = mongoose.Types;
 
 const contactSchema = new Schema(
@@ -36,6 +36,4 @@ contactSchema.statics.deleteContact = deleteContact;
 contactSchema.statics.addContact = addContact;
 contactSchema.statics.updateContact = updateContact;
 
-const Contact = mongoose.model('Contact', contactSchema);
-
-module.exports = Contact;
+export const contactsModel = mongoose.model('Contact', contactSchema);
