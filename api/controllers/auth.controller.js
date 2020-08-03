@@ -1,5 +1,5 @@
 import Joi from "@hapi/joi";
-import { authModel, USER_STATUSES } from "../models/auth.model";
+import { userModel, USER_STATUSES } from "../models/auth.model";
 import bcrypt from "bcrypt";
 import jwt, { verify } from "jsonwebtoken";
 import { createControllerProxy } from "../helpers/controllerProxy";
@@ -14,10 +14,9 @@ import sgMail from "@sendgrid/mail";
 class AuthController {
   async registerUser(req, res, next) {
     try {
-      console.log(req.file.filename)
       const { email, password } = req.body;
 
-      const checkedEmailInDb = await authModel.getUserEmail(email);
+      const checkedEmailInDb = await userModel.getUserEmail(email);
       if (checkedEmailInDb) {
         throw new Conflict("User alredy exist");
       }
@@ -26,7 +25,7 @@ class AuthController {
 
       const avatarURL = `${process.env.SERVER_LINK}${process.env.IMAGES_CATALOG}${req.file.filename}`;
 
-      const result = await authModel.createUser({
+      const result = await userModel.createUser({
         email,
         password: passwordHash,
         avatarURL,
@@ -45,7 +44,7 @@ class AuthController {
   async userLogIn(req, res, next) {
     try {
       const { email, password } = req.body;
-      const userAuth = await authModel.getUserEmail(email);
+      const userAuth = await userModel.getUserEmail(email);
 
       console.log(userAuth);
       if (!userAuth) {
@@ -66,7 +65,7 @@ class AuthController {
       }
 
       const token = this.generateToken(userAuth._id);
-      await authModel.updateUser(userAuth.email, token);
+      await userModel.updateUser(userAuth.email, token);
 
       return res.status(200).json({
         user: {
@@ -85,7 +84,7 @@ class AuthController {
     try {
       const { verificationToken } = req.params;
 
-      const verifyUser = await authModel.getUserByVerificationToken(
+      const verifyUser = await userModel.getUserByVerificationToken(
         verificationToken
       );
 
@@ -93,7 +92,7 @@ class AuthController {
         throw new NotFound("User not found");
       }
 
-      await authModel.verificatedUser(verifyUser.email);
+      await userModel.verificatedUser(verifyUser.email);
 
       res.status(200).json("User been verificated");
     } catch (err) {
@@ -109,7 +108,7 @@ class AuthController {
         throw new Unauthorized("User not authorized");
       }
       const token = authHeaders.replace("Bearer ", "");
-      const user = await authModel.findUserByToken(token);
+      const user = await userModel.findUserByToken(token);
 
       if (!user) {
         throw new Unauthorized("User not authorized");
@@ -135,7 +134,7 @@ class AuthController {
         throw new Unauthorized("User not authorized");
       }
 
-      await authModel.getUserByEmailAndDeleteToken(email);
+      await userModel.getUserByEmailAndDeleteToken(email);
 
       return res.status(204).json();
     } catch (err) {
@@ -153,7 +152,7 @@ class AuthController {
 
       const avatarURL = `${process.env.SERVER_LINK}${process.env.IMAGES_CATALOG}${req.file.filename}`;
 
-      await authModel.updateUserAvatar(req.user.email, avatarURL);
+      await userModel.updateUserAvatar(req.user.email, avatarURL);
 
       return res.status(200).json(avatarURL);
     } catch (err) {
@@ -163,7 +162,7 @@ class AuthController {
 
   async getCurrentUserByToken(req, res, next) {
     try {
-      const user = await authModel.findUserByToken(req.user.token);
+      const user = await userModel.findUserByToken(req.user.token);
       if (!user) {
         throw new Unauthorized("User not authorized");
       }
@@ -177,21 +176,17 @@ class AuthController {
   }
 
   async emailValidation(user) {
-    await sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+    await sgMail.setApiKey(process.env.SEND_GRID_API_KEY);
     const { verificationToken, email } = user;
     const validationUrl = `${process.env.SERVER_LINK}auth/verify/${verificationToken}`;
-    const msg = {
+    const message = {
       to: email,
       from: process.env.EMAIL_SENDER,
-      subject: "Please validate your Email adress",
+      subject: "Please validate your Email address",
       html: `<a href=${validationUrl}>Click here to validate your email</a>`,
     };
 
-    await sgMail.send(msg).then(() => {
-      console.log('Message sent')
-    }).catch((error) => {
-      console.log(error.response.body)
-    })
+    await sgMail.send(message);
   }
 
   async hashingPassword(password) {

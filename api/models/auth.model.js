@@ -1,6 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 import { v4 } from 'uuid';
 
+const { ObjectId } = mongoose.Types;
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
 
@@ -29,42 +30,6 @@ const userSchema = new Schema({
   token: { type: String, required: false },
 });
 
-const getUserEmail = async (email) => {
-  return this.findOne({ email });
-}
-
-const createUser = async (userAuth) => {
-  userAuth.verificationToken = v4();
-  return this.create(userAuth);
-}
-
-const updateUser = async (email, token) => {
-  return this.updateOne({ email }, { token });
-}
-
-const findUserByToken = async (token) => {
-  return this.findOne({ token });
-}
-
-const getUserByEmailAndDeleteToken = async (email) => {
-  return this.updateOne({ email }, { token: '' });
-}
-
-const updateUserAvatar = (email, avatarURL) => {
-  return this.updateOne({ email }, { avatarURL });
-}
-
-const getUserByVerificationToken = async (verificationToken) => {
-  return this.findOne({ verificationToken });
-}
-
-const verificatedUser = async (email) => {
-  return this.updateOne(
-    { email },
-    { verificationToken: null, status: USER_STATUSES.ACTIVE }
-  );
-}
-
 userSchema.statics.getUserEmail = getUserEmail;
 userSchema.statics.createUser = createUser;
 userSchema.statics.updateUser = updateUser;
@@ -74,4 +39,40 @@ userSchema.statics.updateUserAvatar = updateUserAvatar;
 userSchema.statics.getUserByVerificationToken = getUserByVerificationToken;
 userSchema.statics.verificatedUser = verificatedUser;
 
-export const authModel = mongoose.model('User', userSchema);
+function getUserEmail(email) {
+  return this.findOne({ email });
+}
+
+function createUser(userAuth) {
+  userAuth.verificationToken = v4();
+  return this.create(userAuth);
+}
+
+function updateUser(email, token) {
+  return this.updateOne({ email }, { token });
+}
+
+function findUserByToken(token) {
+  return this.findOne({ token });
+}
+
+function getUserByEmailAndDeleteToken(email) {
+  return this.updateOne({ email }, { token: '' });
+}
+
+function updateUserAvatar(email, avatarURL) {
+  return this.updateOne({ email }, { avatarURL });
+}
+
+function getUserByVerificationToken(verificationToken) {
+  return this.findOne({ verificationToken });
+}
+
+function verificatedUser(email) {
+  return this.updateOne(
+    { email },
+    { verificationToken: null, status: USER_STATUSES.ACTIVE }
+  );
+}
+
+export const userModel = mongoose.model('User', userSchema);

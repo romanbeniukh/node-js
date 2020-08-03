@@ -1,39 +1,49 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema } from "mongoose";
 
 const { ObjectId } = mongoose.Types;
 
-const contactSchema = new Schema(
-  {
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    phone: { type: String, required: true },
+const contactSchema = new Schema({
+  userId: { type: String, required: true },
+  name: { type: String, required: true },
+  email: { type: String, required: true },
+  phone: { type: String, required: true },
+});
+
+contactSchema.statics.getAllContacts = getAllContacts;
+contactSchema.statics.getContactById = getContactById;
+contactSchema.statics.addContact = addContact;
+contactSchema.statics.removeContact = removeContact;
+contactSchema.statics.updateContact = updateContact;
+
+async function getAllContacts(userId) {
+  return this.find({ userId });
+}
+
+async function getContactById(id) {
+  if (!ObjectId.isValid(id)) {
+    return null;
   }
-);
 
-const getContacts = async function () {
-  return this.find();
-};
+  return this.findById(id);
+}
 
-const getContactById = async function (id) {
-  return (ObjectId.isValid(id)) ? this.findById(id) : null;
-};
-
-const deleteContact = async function (id) {
-  return (ObjectId.isValid(id)) ? this.findByIdAndDelete(id) : null;
-};
-
-const addContact = async function (contact) {
+async function addContact(contact) {
   return this.create(contact);
 }
 
-const updateContact = async function (id, updateData) {
-  return (ObjectId.isValid(id)) ? this.findByIdAndUpdate(id, updateData, { new: true }) : null;
+async function removeContact(id) {
+  if (!ObjectId.isValid(id)) {
+    return null;
+  }
+  return this.findByIdAndDelete(id);
 }
 
-contactSchema.statics.getContacts = getContacts;
-contactSchema.statics.getContactById = getContactById;
-contactSchema.statics.deleteContact = deleteContact;
-contactSchema.statics.addContact = addContact;
-contactSchema.statics.updateContact = updateContact;
+async function updateContact(id, updateContactInfo) {
+  if (!ObjectId.isValid(id)) {
+    return null;
+  }
 
-export const contactsModel = mongoose.model('Contact', contactSchema);
+  return this.findByIdAndUpdate(id, updateContactInfo);
+}
+
+export const contactsModel = mongoose.model("Contact", contactSchema);

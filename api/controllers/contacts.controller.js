@@ -3,7 +3,8 @@ import { contactsModel } from "../models/contacts.model";
 
 class ContactsController {
   async getAllContacts(req, res, next) {
-    const response = await contactsModel.getAllContacts();
+    const userID = req.user._id;
+    const response = await contactsModel.getAllContacts(userID);
     res.status(200).json(response);
   }
 
@@ -25,7 +26,7 @@ class ContactsController {
     console.log(req.body);
 
     const validateReq = validateRules.validate(req.body);
-    console.log(validateReq);
+    
 
     if (validateReq.error) {
       return res.status(400).json({ message: "missing required name field" });
@@ -57,8 +58,9 @@ class ContactsController {
   }
 
   async addContactToDB(req, res, next) {
+   
     try {
-      const contact = req.body;
+      const contact = { ...req.body, userId: req.user._id };
       const result = await contactsModel.addContact(contact);
       res.status(201).json(result);
     } catch (err) {
